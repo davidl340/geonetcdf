@@ -73,7 +73,7 @@ public class GeoTiffReaderTest extends Assert {
         // no crs geotiff
         //
         final File noCrs = TestData.file(GeoTiffReaderTest.class, "no_crs.tif");
-        final AbstractGridFormat format = new NetCDFFormat();
+        final AbstractGridFormat format = new GeoTiffFormat();
         assertTrue(format.accepts(noCrs));
         GeoTiffReader reader = (GeoTiffReader) format.getReader(noCrs);
         CoordinateReferenceSystem crs=reader.getCrs();
@@ -160,7 +160,7 @@ public class GeoTiffReaderTest extends Assert {
     	final File file = TestData.file(GeoTiffReaderTest.class, "");
     	final File files[] = file.listFiles();
     	final int numFiles = files.length;
-    	final AbstractGridFormat format = new NetCDFFormat();
+    	final AbstractGridFormat format = new GeoTiffFormat();
     	for (int i = 0; i < numFiles; i++) {
     		StringBuilder buffer = new StringBuilder();
     		final String path = files[i].getAbsolutePath().toLowerCase();
@@ -224,7 +224,7 @@ public class GeoTiffReaderTest extends Assert {
     public void testBandNames() throws Exception {
         final File file = TestData.file(GeoTiffReaderTest.class, "wind.tiff");
         assertNotNull(file);
-        final AbstractGridFormat format = new NetCDFFormat();
+        final AbstractGridFormat format = new GeoTiffFormat();
         GridCoverage2D coverage = format.getReader(file).read(null);
         String band1Name = coverage.getSampleDimension(0).getDescription().toString();
         String band2Name = coverage.getSampleDimension(1).getDescription().toString();

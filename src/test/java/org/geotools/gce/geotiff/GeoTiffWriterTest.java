@@ -100,7 +100,7 @@ public class GeoTiffWriterTest extends Assert {
 		// Create format and reader
 		//
 		// /////////////////////////////////////////////////////////////////////
-		final NetCDFFormat format = new NetCDFFormat();
+		final GeoTiffFormat format = new GeoTiffFormat();
 		// getting a reader
 		GridCoverageReader reader = format.getReader(tiff);
 		assertNotNull(reader);
@@ -252,7 +252,7 @@ public class GeoTiffWriterTest extends Assert {
         // world geotiff
         //
         final File testFile = TestData.file(GeoTiffReaderTest.class, "latlon.tiff");
-        final AbstractGridFormat format = new NetCDFFormat();
+        final AbstractGridFormat format = new GeoTiffFormat();
         assertTrue(format.accepts(testFile));
         
         // getting a reader
@@ -303,7 +303,7 @@ public class GeoTiffWriterTest extends Assert {
 	        // no crs geotiff
 	        //
 	        final File noCrs = TestData.file(GeoTiffReaderTest.class, "no_crs.tif");
-	        final AbstractGridFormat format = new NetCDFFormat();
+	        final AbstractGridFormat format = new GeoTiffFormat();
 	        assertTrue(format.accepts(noCrs));
 
 	        // hint for CRS
@@ -329,7 +329,7 @@ public class GeoTiffWriterTest extends Assert {
 	        final File noCrsTFW = new File(TestData.file(GeoTiffReaderTest.class, "."),"no_crs_tfw.tif");
 	        GeoTiffWriter writer = new GeoTiffWriter(noCrsTFW);
 	        
-	        final ParameterValue<Boolean> tfw = NetCDFFormat.WRITE_TFW.createValue();
+	        final ParameterValue<Boolean> tfw = GeoTiffFormat.WRITE_TFW.createValue();
 	        tfw.setValue(true);
 	        writer.write(coverage,new GeneralParameterValue[]{tfw} );
 	        writer.dispose();
@@ -348,7 +348,7 @@ public class GeoTiffWriterTest extends Assert {
         // no crs geotiff
         //
         final File input = TestData.file(GeoTiffReaderTest.class, "geo.tiff");
-        final AbstractGridFormat format = new NetCDFFormat();
+        final AbstractGridFormat format = new GeoTiffFormat();
         assertTrue(format.accepts(input));
 
         // getting a reader

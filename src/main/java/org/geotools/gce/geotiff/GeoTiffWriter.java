@@ -173,7 +173,7 @@ public class GeoTiffWriter extends AbstractGridCoverageWriter implements
 	 * @see org.opengis.coverage.grid.GridCoverageWriter#getFormat()
 	 */
 	public Format getFormat() {
-		return new NetCDFFormat();
+		return new GeoTiffFormat();
 	}
 
 	/*
@@ -189,7 +189,7 @@ public class GeoTiffWriter extends AbstractGridCoverageWriter implements
 			IndexOutOfBoundsException {
 
 		GeoToolsWriteParams gtParams = null;
-		boolean writeTfw=NetCDFFormat.WRITE_TFW.getDefaultValue();
+		boolean writeTfw=GeoTiffFormat.WRITE_TFW.getDefaultValue();
 		if (params != null) {
 			// /////////////////////////////////////////////////////////////////////
 			//
@@ -205,7 +205,7 @@ public class GeoTiffWriter extends AbstractGridCoverageWriter implements
 					if (name.equals(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName())) {
 					    gtParams = (GeoToolsWriteParams) param.getValue();
 					}
-					if (name.equals(NetCDFFormat.WRITE_TFW.getName())){
+					if (name.equals(GeoTiffFormat.WRITE_TFW.getName())){
 					    writeTfw = (Boolean) param.getValue();
 					}
 				}

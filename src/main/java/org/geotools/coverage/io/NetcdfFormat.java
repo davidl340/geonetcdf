@@ -68,7 +68,7 @@ public class NetcdfFormat extends AbstractGridFormat implements Format {
      * @param object May be a netCDF file, or an URL for a netCDF file.
      *
      */
-    public NetcdfReader getReader(final Object object) {
+    public GeocentNetcdfReader getReader(final Object object) {
         return getReader(object, null);
     }
 
@@ -77,9 +77,9 @@ public class NetcdfFormat extends AbstractGridFormat implements Format {
      *
      * @param object May be a netCDF file, or an URL for a netCDF file.
      */
-    public NetcdfReader getReader(final Object object, final Hints hints) {
+    public GeocentNetcdfReader getReader(final Object object, final Hints hints) {
         try {
-            return new NetcdfReader(this, object, null, depth);
+            return new GeocentNetcdfReader(this, object, null, depth);
         } catch (DataSourceException ex) {
             throw new RuntimeException(ex); // TODO: trouver une meilleur exception.
         }

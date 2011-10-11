@@ -418,7 +418,7 @@ public class GeoTiffReader extends AbstractGridCoverage2DReader implements GridC
 	 * @see org.opengis.coverage.grid.GridCoverageReader#getFormat()
 	 */
 	public Format getFormat() {
-		return new NetCDFFormat();
+		return new GeoTiffFormat();
 	}
 
 	/**

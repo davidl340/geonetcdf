@@ -97,8 +97,8 @@ public class GeoTiffFormat extends AbstractGridFormat implements Format {
 	public GeoTiffFormat() {
 		writeParameters = null;
 		mInfo = new HashMap<String, String>();
-		mInfo.put("name", "NetCDF");
-		mInfo.put("description","A NetCDF coverage reader");
+		mInfo.put("name", "GeoTiff");
+		mInfo.put("description","A geotiff netcdf thingy");
 		mInfo.put("vendor", "Geocent");
 		mInfo.put("version", "1.0");
 		mInfo.put("docURL",	"http://www.geocent.com");

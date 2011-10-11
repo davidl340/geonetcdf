@@ -51,11 +51,11 @@ import org.geotools.image.io.netcdf.NetcdfImageReader;
  * @version $Id: NetcdfReader.java 25734 2007-06-04 17:57:06Z desruisseaux $
  * @author C�dric Brian�on
  */
-public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCoverageReader {
+public class GeocentNetcdfReader extends AbstractGridCoverage2DReader implements GridCoverageReader {
     /**
      * The entry to log messages during the process.
      */
-    private static final Logger LOGGER = Logger.getLogger(NetcdfReader.class.toString());
+    private static final Logger LOGGER = Logger.getLogger(GeocentNetcdfReader.class.toString());
 
     /**
      * The reader Spi for netCDF images.
@@ -81,7 +81,8 @@ public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCo
      * @param hints Null in this implementation.
      * @throws DataSourceException
      */
-    public NetcdfReader(final Format format, Object input, Hints hints, int depth) throws DataSourceException {
+    public GeocentNetcdfReader(final Format format, Object input, Hints hints, int depth) throws DataSourceException {
+        System.out.println("Hello, we are in GeocentNetcdfReader, and the debugger sucks.");
         this.depth = depth;
         this.hints = hints;
         this.format = format;
@@ -177,11 +178,13 @@ public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCo
             // Experimental; will be replaced by something more generic soon (work in progress)
             readerSpi = new NetcdfImageReader.Spi();
         } catch (Exception e) {
+            
             throw new IOException(e.toString());
         }
-        final ImageReader reader = readerSpi.createReaderInstance(null);
+//        final ImageReader reader = new NetcdfImageReader(null);
+        final ImageReader reader = readerSpi.createReaderInstance();
         reader.setInput(source);
-        RenderedImage image = reader.read(0);
+        RenderedImage image = reader.read(0, null);
         //image = new ImageWorker(image).forceComponentColorModel().getRenderedImage();
         return createImageCoverage(PlanarImage.wrapRenderedImage(image), raster2Model);
     }
