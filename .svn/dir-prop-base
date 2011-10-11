@@ -1,0 +1,16 @@
+K 10
+svn:ignore
+V 107
+.project
+.settings
+.classpath
+.jetproperties
+.wtpmodules
+target
+bin
+cobertura.ser
+nbproject
+nbactions.xml
+
+
+END
