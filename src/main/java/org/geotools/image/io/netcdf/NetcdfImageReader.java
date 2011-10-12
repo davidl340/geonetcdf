@@ -1,8 +1,8 @@
 /*
- *    GeoTools - The Open Source Java GIS Toolkit
+ *    GeoTools - OpenSource mapping toolkit
  *    http://geotools.org
- *
- *    (C) 2006-2008, Open Source Geospatial Foundation (OSGeo)
+ *    (C) 2006, GeoTools Project Managment Committee (PMC)
+ *    (C) 2006, Geomatys
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -94,9 +94,8 @@ import org.geotools.resources.i18n.ErrorKeys;
  * copied in a temporary file.
  *
  * @since 2.4
- *
- * @source $URL: http://svn.osgeo.org/geotools/tags/2.7.2/modules/unsupported/coverageio-netcdf/src/main/java/org/geotools/image/io/netcdf/NetcdfImageReader.java $
- * @version $Id: NetcdfImageReader.java 37307 2011-05-25 06:34:11Z mbedward $
+ * @source $URL: http://svn.geotools.org/geotools/tags/2.4.2/modules/unsupported/coverageio-netcdf/src/main/java/org/geotools/image/io/netcdf/NetcdfImageReader.java $
+ * @version $Id: NetcdfImageReader.java 27762 2007-11-05 21:11:12Z desruisseaux $
  * @author Antoine Hnawia
  * @author Martin Desruisseaux
  */
@@ -137,7 +136,7 @@ public class NetcdfImageReader extends FileImageReader implements CancelTask {
      * The data type to accept in images. Used for automatic detection of which variables
      * to assign to images.
      */
-    private static final Set<DataType> VALID_TYPES = new HashSet<DataType>(12);
+    private static final Set/*<DataType>*/ VALID_TYPES = new HashSet(12);
     static {
         VALID_TYPES.add(DataType.BOOLEAN);
         VALID_TYPES.add(DataType.BYTE);
@@ -247,7 +246,7 @@ public class NetcdfImageReader extends FileImageReader implements CancelTask {
         if (variableNames == null) {
             ensureFileOpen();
         }
-        return variableNames.clone();
+        return (String[]) variableNames.clone();
     }
 
     /**
@@ -257,11 +256,9 @@ public class NetcdfImageReader extends FileImageReader implements CancelTask {
      * <p>
      * If {@code variableNames} is set to {@code null} (which is the default), then the
      * variables will be inferred from the content of the NetCDF file.
-     *
-     * @param variableNames The set of variables to be assigned to image index.
      */
     public void setVariables(final String[] variableNames) {
-        this.variableNames = (variableNames != null) ? variableNames.clone() : null;
+        this.variableNames = (variableNames != null) ? (String[]) variableNames.clone() : null;
     }
 
     /**
@@ -270,44 +267,11 @@ public class NetcdfImageReader extends FileImageReader implements CancelTask {
      * @throws IllegalStateException if the input source has not been set.
      * @throws IOException if an error occurs reading the information from the input source.
      */
-    @Override
+    //@Override
     public int getNumImages(final boolean allowSearch) throws IllegalStateException, IOException {
         ensureFileOpen();
         // TODO: consider returning the actual number of images in the file.
         return variableNames.length;
-    }
-
-    /**
-     * Returns the number of bands available for the specified image.
-     *
-     * @param  imageIndex  The image index.
-     * @return The number of bands available.
-     * @throws IOException if an error occurs reading the information from the input source.
-     */
-    @Override
-    public int getNumBands(final int imageIndex) throws IOException {
-        prepareVariable(imageIndex);
-        final int rank = variable.getRank();
-        final int bandDimension = rank - Z_DIMENSION;
-        if (bandDimension >= 0 && bandDimension < rank) {
-            return variable.getDimension(bandDimension).getLength();
-        }
-        return super.getNumBands(imageIndex);
-    }
-
-    /**
-     * Returns the number of dimension of the image at the given index.
-     *
-     * @param  imageIndex The image index.
-     * @return The number of dimension for the image at the given index.
-     * @throws IOException if an error occurs reading the information from the input source.
-     *
-     * @since 2.5
-     */
-    @Override
-    public int getDimension(final int imageIndex) throws IOException {
-        prepareVariable(imageIndex);
-        return variable.getRank();
     }
 
     /**
@@ -375,8 +339,6 @@ scan:       while (it.hasNext()) {
 
     /**
      * Returns the image width.
-     *
-     * @throws IOException If an error occured while reading the NetCDF file.
      */
     public int getWidth(final int imageIndex) throws IOException {
         prepareVariable(imageIndex);
@@ -385,8 +347,6 @@ scan:       while (it.hasNext()) {
 
     /**
      * Returns the image height.
-     *
-     * @throws IOException If an error occured while reading the NetCDF file.
      */
     public int getHeight(final int imageIndex) throws IOException {
         prepareVariable(imageIndex);
@@ -405,10 +365,8 @@ scan:       while (it.hasNext()) {
 
     /**
      * Returns the metadata associated with the input source as a whole.
-     *
-     * @throws IOException If an error occured while reading the NetCDF file.
      */
-    @Override
+    //@Override
     public IIOMetadata getStreamMetadata() throws IOException {
         if (streamMetadata == null && !ignoreMetadata) {
             ensureFileOpen();
@@ -420,10 +378,8 @@ scan:       while (it.hasNext()) {
 
     /**
      * Returns the metadata associated with the image at the specified index.
-     *
-     * @throws IOException If an error occured while reading the NetCDF file.
      */
-    @Override
+    //@Override
     public IIOMetadata getImageMetadata(final int imageIndex) throws IOException {
         if (imageMetadata == null && !ignoreMetadata) {
             prepareVariable(imageIndex);
@@ -440,10 +396,6 @@ scan:       while (it.hasNext()) {
      * by {@link #getStreamMetadata} when first needed. The default implementation returns an
      * instance of {@link NetcdfMetadata}. Subclasses can override this method in order to create
      * a more specific set of metadata.
-     *
-     * @param  file The NetCDF dataset.
-     * @return The metadata for the given dataset.
-     * @throws IOException If an error occured while reading the NetCDF file.
      */
     protected IIOMetadata createMetadata(final NetcdfDataset file) throws IOException {
         return new NetcdfMetadata(this, file);
@@ -454,10 +406,6 @@ scan:       while (it.hasNext()) {
      * by {@link #getImageMetadata} when first needed. The default implementation returns an
      * instance of {@link NetcdfMetadata}. Subclasses can override this method in order to create
      * a more specific set of metadata.
-     *
-     * @param  variable The NetCDF variable.
-     * @return The metadata for the given variable.
-     * @throws IOException If an error occured while reading the NetCDF file.
      */
     protected IIOMetadata createMetadata(final VariableDS variable) throws IOException {
         return new NetcdfMetadata(this, variable);
@@ -468,9 +416,9 @@ scan:       while (it.hasNext()) {
      *
      * @param  imageIndex The index of the image to be queried.
      * @return The data type, or {@link DataBuffer#TYPE_UNDEFINED} if unknown.
-     * @throws IOException If an error occured while reading the NetCDF file.
+     * @throws IOException If an error occurs reading the format information from the input source.
      */
-    @Override
+    //@Override
     protected int getRawDataType(final int imageIndex) throws IOException {
         prepareVariable(imageIndex);
         return VariableMetadata.getRawDataType(variable);
@@ -481,7 +429,7 @@ scan:       while (it.hasNext()) {
      *
      * @return The axis type.
      * @return The indice as a value from 0 inclusive to {@link Dimension#getLength} exclusive.
-     * @throws IOException If an error occured while reading the NetCDF file.
+     * @throws IOException If an error occured while reading the data.
      */
     private int getSliceIndice(final ImageReadParam param, final int dimension) throws IOException {
         if (param instanceof NetcdfReadParam) {
@@ -507,7 +455,7 @@ scan:       while (it.hasNext()) {
      *
      * @param  dimension The dimension.
      * @return The axis type, or {@code null} if unknown.
-     * @throws IOException If an error occured while reading the NetCDF file.
+     * @throws IOException If an error occured while loading the axis informations.
      */
     private AxisType getAxisType(final int dimension) throws IOException {
         if (variable instanceof VariableDS) {
@@ -619,7 +567,7 @@ scan:       while (it.hasNext()) {
                         filtered[count++] = candidate.getName();
                     }
                 }
-                variableNames = XArray.resize(filtered, count);
+                variableNames = (String[]) XArray.resize(filtered, count);
             }
         }
     }
@@ -639,12 +587,12 @@ scan:       while (it.hasNext()) {
      *   <li>{@link #read(int,ImageReadParam)}</li>
      * </ul>
      *
-     * @param  imageIndex The image index.
-     * @return {@code true} if the {@linkplain #variable} changed as a result of this call,
-     *         or {@code false} if the current value is already appropriate.
-     * @throws IndexOutOfBoundsException if the specified index is outside the expected range.
-     * @throws IllegalStateException If {@link #input} is not set.
-     * @throws IOException If an error occured while reading the NetCDF file.
+     * @param   imageIndex The image index.
+     * @return  {@code true} if the {@linkplain #variable} changed as a result of this call,
+     *          or {@code false} if the current value is already appropriate.
+     * @throws  IndexOutOfBoundsException if the specified index is outside the expected range.
+     * @throws  IllegalStateException If {@link #input} is not set.
+     * @throws  IOException If the operation failed because of an I/O error.
      */
     protected boolean prepareVariable(final int imageIndex) throws IOException {
         checkImageIndex(imageIndex);
@@ -654,7 +602,8 @@ scan:       while (it.hasNext()) {
             final Variable candidate = findVariable(name);
             final int rank = candidate.getRank();
             if (rank < Math.max(X_DIMENSION, Y_DIMENSION)) {
-                throw new IIOException(Errors.format(ErrorKeys.NOT_TWO_DIMENSIONAL_$1, rank));
+                throw new IIOException(Errors.format(
+                        ErrorKeys.NOT_TWO_DIMENSIONAL_$1, new Integer(rank)));
             }
             variable      = candidate;
             variableIndex = imageIndex;
@@ -673,7 +622,7 @@ scan:       while (it.hasNext()) {
      * @param  name The name of the variable to search.
      * @return The variable for the given name.
      * @throws IIOException if no variable has been found for the given name.
-     * @throws IOException If an error occured while reading the NetCDF file.
+     * @throws IOException If the operation failed because of an I/O error.
      */
     protected Variable findVariable(final String name) throws IOException {
         ensureFileOpen();
@@ -690,11 +639,12 @@ scan:       while (it.hasNext()) {
          * We tried a case-sensitive search without success. Now tries a case-insensitive search
          * before to report a failure.
          */
-        final List<Variable> variables = dataset.getVariables();
+        final List/*<Variable>*/ variables = dataset.getVariables();
         if (variables != null) {
-            for (final Variable variable : variables) {
-                if (variable!=null && name.equalsIgnoreCase(variable.getName())) {
-                    return variable;
+            for (final java.util.Iterator/*<Variable>*/ it=variables.iterator(); it.hasNext();) {
+                candidate = (Variable) it.next();
+                if (candidate!=null && name.equalsIgnoreCase(candidate.getName())) {
+                    return candidate;
                 }
             }
         }
@@ -708,15 +658,13 @@ scan:       while (it.hasNext()) {
      * @return Parameters which may be used to control the decoding process using a set
      *         of default settings.
      */
-    @Override
+    //@Override
     public ImageReadParam getDefaultReadParam() {
         return new NetcdfReadParam(this);
     }
 
     /**
      * Creates an image from the specified parameters.
-     *
-     * @throws IOException If an error occured while reading the NetCDF file.
      */
     public BufferedImage read(final int imageIndex, final ImageReadParam param) throws IOException {
         clearAbortRequest();
@@ -740,15 +688,15 @@ scan:       while (it.hasNext()) {
         }
         final int rank = variable.getRank();
         int bandDimension = rank - Z_DIMENSION;
-        if (false && param instanceof NetcdfReadParam) {
+        if (param instanceof NetcdfReadParam) {
             final NetcdfReadParam p = (NetcdfReadParam) param;
-            if (p.isBandDimensionSet() && variable instanceof VariableEnhanced) {
+            if (variable instanceof VariableEnhanced) {
                 ensureMetadataLoaded(); // Build the CoordinateSystems
                 bandDimension = p.getBandDimension((VariableEnhanced) variable);
                 final int relative = rank - bandDimension;
                 if (relative < 0 || relative == X_DIMENSION || relative == Y_DIMENSION) {
                     throw new IllegalArgumentException(Errors.format(ErrorKeys.BAD_PARAMETER_$2,
-                            "bandDimension", bandDimension));
+                            "bandDimension", new Integer(bandDimension)));
                 }
             }
         }
@@ -815,7 +763,7 @@ scan:       while (it.hasNext()) {
                 throw netcdfFailure(e);
             }
         }
-        final List<Range> sections = Range.toList(ranges);
+        final List sections = Range.toList(ranges);
         /*
          * Reads the requested sub-region only.
          */
@@ -892,8 +840,6 @@ scan:       while (it.hasNext()) {
     /**
      * Invoked by the NetCDF library during read operation in order to check if the task has
      * been canceled. Users should not invoke this method directly.
-     *
-     * @return {@code true} if abort has been requested.
      */
     public boolean isCancel() {
         return abortRequested();
@@ -902,8 +848,6 @@ scan:       while (it.hasNext()) {
     /**
      * Invoked by the NetCDF library when an error occured during the read operation.
      * Users should not invoke this method directly.
-     *
-     * @param message An error message to report.
      */
     public void setError(final String message) {
         lastError = message;
@@ -911,10 +855,8 @@ scan:       while (it.hasNext()) {
 
     /**
      * Closes the NetCDF file.
-     *
-     * @throws IOException If an error occured while accessing the NetCDF file.
      */
-    @Override
+    //@Override
     protected void close() throws IOException {
         metadataLoaded = false;
         streamMetadata = null;
@@ -933,7 +875,7 @@ scan:       while (it.hasNext()) {
     /**
      * The service provider for {@link NetcdfImageReader}.
      *
-     * @version $Id: NetcdfImageReader.java 37307 2011-05-25 06:34:11Z mbedward $
+     * @version $Id: NetcdfImageReader.java 27762 2007-11-05 21:11:12Z desruisseaux $
      * @author Antoine Hnawia
      * @author Martin Desruisseaux
      */
@@ -992,7 +934,6 @@ scan:       while (it.hasNext()) {
          * This method is only for indication purpose. Current implementation
          * conservatively returns {@code false}.
          *
-         * @throws IOException If an error occured while reading the NetCDF file.
          * @todo Implements a more advanced check.
          */
         public boolean canDecodeInput(final Object source) throws IOException {
@@ -1001,8 +942,6 @@ scan:       while (it.hasNext()) {
 
         /**
          * Constructs a NetCDF image reader.
-         *
-         * @throws IOException If an error occured while reading the NetCDF file.
          */
         public ImageReader createReaderInstance(final Object extension) throws IOException {
             return new NetcdfImageReader(this);

@@ -1,8 +1,7 @@
 /*
- *    GeoTools - The Open Source Java GIS Toolkit
+ *    GeoTools - OpenSource mapping toolkit
  *    http://geotools.org
- * 
- *    (C) 2007-2008, Open Source Geospatial Foundation (OSGeo)
+ *    (C) 2007, GeoTools Project Managment Committee (PMC)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -18,12 +17,14 @@ package org.geotools.image.io.netcdf;
 
 import java.awt.image.DataBuffer;
 
+// NetCDF dependencies
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 import ucar.nc2.VariableIF;
 import ucar.nc2.dataset.VariableEnhanced;
 
+// Geotools dependencies
 import org.geotools.resources.XArray;
 import org.geotools.image.io.metadata.Band;
 
@@ -44,13 +45,13 @@ import org.geotools.image.io.metadata.Band;
  *       convert them.</li>
  * </ul>
  *
- * @source $URL: http://svn.osgeo.org/geotools/tags/2.7.2/modules/unsupported/coverageio-netcdf/src/main/java/org/geotools/image/io/netcdf/VariableMetadata.java $
- * @version $Id: VariableMetadata.java 30680 2008-06-13 10:22:22Z acuster $
+ * @source $URL: http://svn.geotools.org/geotools/tags/2.4.2/modules/unsupported/coverageio-netcdf/src/main/java/org/geotools/image/io/netcdf/VariableMetadata.java $
+ * @version $Id: VariableMetadata.java 27583 2007-10-23 11:29:26Z desruisseaux $
  * @author Martin Desruisseaux
  */
 final class VariableMetadata {
     /**
-     * Raw image type as one of {@link DataBuffer} constants.
+     * Raw image type as one of {@link DataBuffer} constants.
      */
     private final int imageType;
 
