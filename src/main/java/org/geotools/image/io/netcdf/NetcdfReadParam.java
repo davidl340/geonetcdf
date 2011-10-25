@@ -1,13 +1,13 @@
 /*
- *    GeoTools - OpenSource mapping toolkit
+ *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
- *    (C) 2007, Geotools Project Managment Committee (PMC)
- *    (C) 2007, Geomatys
+ * 
+ *    (C) 2007-2008, Open Source Geospatial Foundation (OSGeo)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
- *    License as published by the Free Software Foundation; either
- *    version 2.1 of the License, or (at your option) any later version.
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
  *
  *    This library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -37,9 +37,16 @@ import org.geotools.resources.i18n.Errors;
  * Default parameters for {@link NetcdfImageReader}.
  *
  * @since 2.4
- * @source $URL: http://svn.geotools.org/geotools/tags/2.4.2/modules/unsupported/coverageio-netcdf/src/main/java/org/geotools/image/io/netcdf/NetcdfReadParam.java $
- * @version $Id: NetcdfReadParam.java 27071 2007-09-19 19:02:54Z desruisseaux $
+ *
+ * @source $URL: http://svn.osgeo.org/geotools/tags/2.7.2/modules/unsupported/coverageio-netcdf/src/main/java/org/geotools/image/io/netcdf/NetcdfReadParam.java $
+ * @version $Id: NetcdfReadParam.java 37307 2011-05-25 06:34:11Z mbedward $
  * @author Martin Desruisseaux
+ *
+ * @deprecated Having <cite>band dimension</cite> in this class is a problem because it make
+ *             difficult to implement {@link NetcdfImageReader#getNumBands} in a reliable way.
+ *             The information contained in this class need to move in some interface or in
+ *             a {@code FileImageReaderND} superclass (common to NetCDF and HDF readers). The
+ *             {@link AxisType} enumeration needs to be replaced by something neutral from GeoAPI.
  */
 public class NetcdfReadParam extends GeographicImageReadParam {
     /**
@@ -61,13 +68,13 @@ public class NetcdfReadParam extends GeographicImageReadParam {
      * The types of the dimension to use as image bands. If more than one type is specified,
      * only the first dimension with a suitable type will be assigned to bands.
      */
-    private Set/*<AxisType>*/ bandDimensionTypes;
+    private Set<AxisType> bandDimensionTypes;
 
     /**
      * For <var>n</var>-dimensional images, the indices to use for dimensions above 2.
      * Will be created only when first needed.
      */
-    private Map/*<AxisType,Integer>*/ sliceIndices;
+    private Map<AxisType,Integer> sliceIndices;
 
     /**
      * Creates a new, initially empty, set of parameters.
@@ -81,9 +88,20 @@ public class NetcdfReadParam extends GeographicImageReadParam {
     }
 
     /**
+     * Returns {@code true} if there is some possibility that {@link #getBandDimension}
+     * returns a positive value.
+     */
+    final boolean isBandDimensionSet() {
+        return (bandDimensionTypes != null) && !bandDimensionTypes.isEmpty() &&
+                NetcdfReadParam.class.equals(getClass());
+        // The last check is because the user could have overriden getBandDimension.
+    }
+
+    /**
      * Returns the dimension to assign to bands for the specified variable. The default
      * implementation returns the last dimension corresponding to one of the types specified
-     * to {@link #setBandDimensionTypes}.
+     * to {@link #setBandDimensionTypes}. Users can override this method if the bands should
+     * be assigned from a dimension computed differently.
      * <p>
      * <b>Example:</b> For a NetCDF variable having dimensions in the
      * (<var>t</var>,<var>z</var>,<var>y</var>,<var>x</var>) order (as in CF convention), if the
@@ -94,17 +112,17 @@ public class NetcdfReadParam extends GeographicImageReadParam {
      * @param variable The variable for which we want to determine the dimension to assign to bands.
      * @return The dimension assigned to bands, or {@code -1} if none.
      */
-    public int getBandDimension(final VariableEnhanced variable) {
+    protected int getBandDimension(final VariableEnhanced variable) {
         if (bandDimensionTypes != null) {
-            final List sys = variable.getCoordinateSystems();
+            final List<CoordinateSystem> sys = variable.getCoordinateSystems();
             if (sys != null) {
                 final int count = sys.size();
                 for (int i=0; i<count; i++) {
-                    final CoordinateSystem cs = (CoordinateSystem) sys.get(i);
-                    final List axes = cs.getCoordinateAxes();
+                    final CoordinateSystem cs = sys.get(i);
+                    final List<CoordinateAxis> axes = cs.getCoordinateAxes();
                     if (axes != null) {
                         for (int j=axes.size(); --j>=0;) { // Must be reverse order; see javadoc
-                            final CoordinateAxis axis = (CoordinateAxis) axes.get(j);
+                            final CoordinateAxis axis = axes.get(j);
                             if (axis != null && bandDimensionTypes.contains(axis.getAxisType())) {
                                 return j;
                             }
@@ -124,7 +142,7 @@ public class NetcdfReadParam extends GeographicImageReadParam {
         if (bandDimensionTypes == null) {
             return null;
         }
-        return (AxisType[]) bandDimensionTypes.toArray(new AxisType[bandDimensionTypes.size()]);
+        return bandDimensionTypes.toArray(new AxisType[bandDimensionTypes.size()]);
     }
 
     /**
@@ -139,13 +157,11 @@ public class NetcdfReadParam extends GeographicImageReadParam {
      * the {@linkplain AxisType#Height height} and {@linkplain AxisType#Pressure pressure} types.
      *
      * @param type The types of dimension to assign to bands.
-     * 
-     * @todo Use vararg when we will be allowed to compile for J2SE 1.5.
      */
-    public void setBandDimensionTypes(final AxisType[] types) {
+    public void setBandDimensionTypes(final AxisType... types) {
         if (types != null && types.length != 0) {
             if (bandDimensionTypes == null) {
-                bandDimensionTypes = new HashSet/*<AxisType>*/();
+                bandDimensionTypes = new HashSet<AxisType>();
             } else {
                 bandDimensionTypes.clear();
             }
@@ -168,7 +184,7 @@ public class NetcdfReadParam extends GeographicImageReadParam {
      */
     public int getSliceIndice(final AxisType axis) {
         if (sliceIndices != null) {
-            final Integer indice = (Integer) sliceIndices.get(axis);
+            final Integer indice = sliceIndices.get(axis);
             if (indice != null) {
                 return indice.intValue();
             }
@@ -192,14 +208,13 @@ public class NetcdfReadParam extends GeographicImageReadParam {
      */
     public void setSliceIndice(final AxisType dimension, final int indice) {
         if (indice < 0) {
-            throw new IllegalArgumentException(Errors.format(ErrorKeys.ILLEGAL_ARGUMENT_$2,
-                    "indice", new Integer(indice)));
+            throw new IllegalArgumentException(Errors.format(ErrorKeys.ILLEGAL_ARGUMENT_$2, "indice", indice));
         }
         if (indice != DEFAULT_INDICE) {
             if (sliceIndices == null) {
-                sliceIndices = new HashMap/*<AxisType,Integer>*/();
+                sliceIndices = new HashMap<AxisType,Integer>();
             }
-            sliceIndices.put(dimension, new Integer(indice));
+            sliceIndices.put(dimension, indice);
         } else if (sliceIndices != null) {
             sliceIndices.remove(dimension);
             if (sliceIndices.isEmpty()) {

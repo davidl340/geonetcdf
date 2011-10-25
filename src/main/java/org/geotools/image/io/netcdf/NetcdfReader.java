@@ -225,7 +225,7 @@ public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCo
         //manually set this metadata once again
         //final Envelope geographicArea = new Envelope2D(DefaultGeographicCRS.WGS84,);
         final Envelope geographicArea = new Envelope2D(DefaultGeographicCRS.WGS84, -180, -89, 360, 180);
-        final NumberRange temperatureRange = new NumberRange(271.343f, 305.22f);
+        final NumberRange temperatureRange = new NumberRange(7000f, 10000f);
         final NumberRange sampleValueRange = new NumberRange(1, 255);
         final Color[] colorPalette = new Color[]{Color.RED, Color.GREEN, Color.BLUE};
 
