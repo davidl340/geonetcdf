@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.HashSet;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.awt.image.DataBuffer;
 import java.net.URL;
@@ -852,13 +853,22 @@ scan:       while (it.hasNext()) {
                             break;
                         }
                         default: {
-                            raster.setSample(x, y, dstBand, converter.convert(it.getIntNext()));
+                            int value = it.getIntNext();
+                            if (value < 0) {
+                                raster.setSample(x, y, dstBand, Double.NaN);
+                                break;
+                            }
+                            double dvalue = converter.convert(value);
+//                            dvalue = dvalue*.010 + 20;
+                            raster.setSample(x, y, dstBand, dvalue);
                             break;
                         }
                     }
                 }
             }
+            
             /*
+             * 
              * Checks for abort requests after reading. It would be a waste of a potentially
              * good image (maybe the abort request occured after we just finished the reading)
              * if we didn't implemented the 'isCancel()' method. But because of the later, which

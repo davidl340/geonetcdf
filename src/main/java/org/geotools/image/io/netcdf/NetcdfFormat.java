@@ -1,7 +1,6 @@
 package org.geotools.image.io.netcdf;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,7 +59,7 @@ public class NetcdfFormat extends AbstractGridFormat implements Format {
      */
     public NetcdfReader getReader(final Object object, final Hints hints) {
         try {
-            return new NetcdfReader(object, null);
+            return new NetcdfReader(object, hints);
         } catch (IOException e) {
             if (LOGGER.isLoggable(Level.WARNING)) {
                 LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);

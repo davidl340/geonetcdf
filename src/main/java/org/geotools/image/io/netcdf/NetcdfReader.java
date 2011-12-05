@@ -2,6 +2,7 @@ package org.geotools.image.io.netcdf;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -39,6 +40,7 @@ import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.io.GridCoverageReader;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.parameter.Parameter;
+import org.geotools.util.Range;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.MathTransform;
 
@@ -124,7 +126,7 @@ public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCo
         //can we do this other way?
         this.coverageName = "TMP";
 
-        final Rectangle actualDim = new Rectangle(0, 0, 360, 180);
+        final Rectangle actualDim = new Rectangle( -82, 8, 42, 30);
         this.originalGridRange = new GridEnvelope2D(actualDim);
 //        originalGridRange = new GeneralGridRange(new Rectangle(0, 0, 360, 180));
 
@@ -149,7 +151,7 @@ public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCo
         // Compute source Resolution
         //
         // /////////////////////////////////////////////////////////////////////
-        highestRes = getResolution(originalEnvelope, new Rectangle(0, 0, 360, 180), crs);
+        highestRes = getResolution(originalEnvelope, new Rectangle( -82, 8, 42, 30), crs);
         numOverviews = 0;
         overViewResolutions = null;
     }
@@ -212,39 +214,63 @@ public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCo
         reader.setInput(source);
 
         final ImageReadParam param = reader.getDefaultReadParam();
-        //param.setSourceRegion(dim);
-        final Rectangle region = new Rectangle(0, 0, 360, 180);
-        param.setSourceRegion(region);
+        param.setSourceRegion(dim);
+//        final Rectangle region = new Rectangle(0, 0, dim.getWidth(), dim.getHeight());
+//        param.setSourceRegion(region);
 
         //still limited to 1 depth level
         int[] depthLevels = new int[]{0};
         param.setSourceBands(depthLevels);
 
-        RenderedImage image = reader.read(0, param);
+//        RenderedImage image = reader.read(0, param);
+        BufferedImage image = reader.read(0, param);
 
         //manually set this metadata once again
         //final Envelope geographicArea = new Envelope2D(DefaultGeographicCRS.WGS84,);
-        final Envelope geographicArea = new Envelope2D(DefaultGeographicCRS.WGS84, -180, -89, 360, 180);
-        final NumberRange temperatureRange = new NumberRange(7000f, 10000f);
-        final NumberRange sampleValueRange = new NumberRange(1, 255);
-        final Color[] colorPalette = new Color[]{Color.RED, Color.GREEN, Color.BLUE};
+//        final Envelope geographicArea = new Envelope2D(DefaultGeographicCRS.WGS84, -180, -89, 360, 180);
+        final Envelope geographicArea = new Envelope2D(DefaultGeographicCRS.WGS84, -98, 8, 32, 30);
+//        final NumberRange temperatureRange = new NumberRange(7000f, 10000f);
+        final NumberRange sampleValueRange = new NumberRange(new Range(Float.class, 0f, 12000f));
+        final NumberRange temperatureRange = new NumberRange(new Range(Float.class, 0f, 30f));
+//        final Color[] colorPalette = new Color[]{Color.RED, Color.GREEN, Color.BLUE};
+        final Color[] colorPalette = new Color[]{Color.BLUE.brighter(), Color.YELLOW.brighter(), Color.RED.darker()};
+        final Color transparent = new Color(0, 0,0,0);
+        
 
         GridSampleDimension temperature = new GridSampleDimension("Temperature", new Category[]{
-            Category.NODATA,
-            new Category("Temperature", colorPalette, sampleValueRange, temperatureRange)
-        }, javax.measure.unit.SI.KELVIN);
+            new Category("Nodata", transparent, Float.NaN),
+            //new Category("Temperature", colorPalette, sampleValueRange, temperatureRange)
+            new Category("Bubba", colorPalette, sampleValueRange, .0010, 20.0)
+//            new Category("Bubba", colorPalette, temperatureRange, .00001, .0000001)
+        }, javax.measure.unit.SI.CELSIUS);
+        
+        GridSampleDimension[] gridSampleDimensionArray = new GridSampleDimension[] { temperature }; 
+        
+        
+        
+//        GridSampleDimension temperature = new GridSampleDimension("Temperature", new Category[]{
+//            Category.NODATA,
+//            new Category("Temperature", colorPalette, sampleValueRange, temperatureRange)
+//        }, javax.measure.unit.SI.KELVIN);
+        
+        
         // Necessary because our data are already geophysics.
-        temperature = temperature.geophysics(false);
+        //temperature = temperature.geophysics(false);
 
         /*
          * Now create the coverage.
          */
+//        final GridCoverageFactory factory = new GridCoverageFactory(hints);
+//        GridCoverage2D coverage = factory.create("Temperature", image, geographicArea,
+//                new GridSampleDimension[]{
+//            temperature
+//        // If we had more bands, we would enumerate them here.
+//        }, null, null);
+
         final GridCoverageFactory factory = new GridCoverageFactory(hints);
-        GridCoverage2D coverage = factory.create("Temperature", image, geographicArea,
-                new GridSampleDimension[]{
-            temperature
-        // If we had more bands, we would enumerate them here.
-        }, null, null);
+
+//        GridCoverage2D coverage = factory.create("Temperature", image, geographicArea);
+        GridCoverage2D coverage = factory.create("Temperature", image.getRaster(), geographicArea, gridSampleDimensionArray); 
 
       
         // return the coverage
@@ -409,11 +435,17 @@ public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCo
 
         //hardcoded for now
         //should get this from metadata store
-        final double longMin = -180;
-        final double longMax = 180;
-
-        final double latMin = -89;
-        final double latMax = 90;
+//        final double longMin = -180;
+//        final double longMax = 180;
+//        final double latMin = -89;
+//        final double latMax = 90;
+        
+        final double longMin = -124;
+        final double longMax = -82;
+        
+// -82, 8, 42, 30
+        final double latMin = 8;
+        final double latMax = 38;
 
         // longitude
         env.setRange(0, longMin, longMax);
@@ -534,7 +566,18 @@ public class NetcdfReader extends AbstractGridCoverage2DReader implements GridCo
     }
 
     public GridSampleDimension[] getSampleDimensions(int index) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        final NumberRange sampleValueRange = new NumberRange(5000f, 15000f);
+//        final Color[] colorPalette = new Color[]{Color.RED, Color.GREEN, Color.BLUE};
+        final Color[] colorPalette = new Color[]{Color.BLACK, Color.WHITE};
+
+        GridSampleDimension temperature = new GridSampleDimension("Temperature", new Category[]{
+            new Category("Nodata", Color.YELLOW, -30000),
+            //new Category("Temperature", colorPalette, sampleValueRange, temperatureRange)
+            new Category("Bubba", colorPalette, sampleValueRange, .0010, 20.0)
+        }, javax.measure.unit.SI.CELSIUS);
+        return new GridSampleDimension[] {
+            temperature };
+    
     }
 
     public GridCoverage getGridCoverage(int index) throws IOException {
